@@ -3,6 +3,7 @@ public class IDChecker extends Thread{
     public static long time = System.currentTimeMillis();
     int id;
 
+
     public IDChecker (int id) {
         this.id = id;
         setName("IDChecker"+id);
@@ -13,9 +14,19 @@ public class IDChecker extends Thread{
         while(true){
             if (!ElectionDay.idCheckerLine.isEmpty()) {
                 Voter v = ElectionDay.idCheckerLine.get(0);
-                v.waitForIdCheck.set(false);
-                ElectionDay.idCheckerLine.remove(0);
-                msg("Checked Voter"+v.id+" ID");
+                //If the voter is already being assisted
+                if (v.beingAssisted.compareAndSet(false,true)){
+                    try{
+                        ElectionDay.idCheckerLine.remove(0);
+                        msg("Checked Voter"+v.id+" ID");
+                    } catch (Exception e) {
+                        msg("Unable to check Voter"+v.id);
+                    } finally {
+                        v.waitForKioskHelper.set(true);
+                        v.waitForIdCheck.set(false);
+                        v.beingAssisted.set(false);
+                    }
+                }
             }
             try {
                 sleep(1000);
