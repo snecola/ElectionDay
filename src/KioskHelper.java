@@ -4,6 +4,7 @@ public class KioskHelper extends Thread{
 
     public static long time = System.currentTimeMillis();
     int id;
+    int shortestQueue=0;
 
     public KioskHelper (int id) {
         this.id = id;
@@ -19,13 +20,13 @@ public class KioskHelper extends Thread{
                 if (v.beingAssisted.compareAndSet(false,true)){
                     try{
                         ElectionDay.kioskHelperLine.remove(0);
-                        int shortestQueue=0;
-                        for (int i=0; i<ElectionDay.num_k;i++) {
-                            if (ElectionDay.kioskQueues.get(shortestQueue).size()> ElectionDay.kioskQueues.get(i).size())
-                                shortestQueue=i;
-                        }
+//                        for (int i=0; i<ElectionDay.num_k;i++) {
+//                            if (ElectionDay.kioskQueues.get(shortestQueue).size()> ElectionDay.kioskQueues.get(i).size())
+//                                shortestQueue=i;
+//                        }
                         ElectionDay.kioskQueues.get(shortestQueue).add(v);
-                        msg("Added Voter"+v.id+" to Kiosk" +shortestQueue);
+                        //msg("Added Voter"+v.id+" to Kiosk" +shortestQueue);
+                        shortestQueue=(shortestQueue+1)%ElectionDay.num_k;
                     } catch (Exception e) {
                         msg("Unable to check Voter"+v.id);
                     } finally {
@@ -34,33 +35,23 @@ public class KioskHelper extends Thread{
                     }
                 }
             }
+            try {
+                sleep(1000);
+                completeBallot();
+            } catch (InterruptedException e) {
+                msg("Interupted while completing ballot");
+            }
         }
     }
 
-//    private int findShortestKioskQueue () {
-//        int shortestQueue = 0;
-//        for (int i=1; i<ElectionDay.kioskQueues.length;i++) {
-//            if (ElectionDay.kioskQueues[shortestQueue].size()>ElectionDay.kioskQueues[i].size())
-//                shortestQueue=i;
-//        }
-//        return shortestQueue;
-//    }
-
     private void completeBallot () {
-        for(int i=0;i<ElectionDay.kioskQueues.size();i++){
-            if(!ElectionDay.kioskQueues.get(i).isEmpty()) {
-                Voter voterAtKiosk = ElectionDay.kioskQueues.get(i).get(0);
-                if (voterAtKiosk.beingAssisted.compareAndSet(false,true)){
-                    try{
-                        ElectionDay.kioskQueues.get(i).remove(0);
-                        msg("Allowed Voter"+voterAtKiosk.id+" to use Kiosk"+i);
-                    } catch (Exception e) {
-                        msg("Voter"+voterAtKiosk.id+" unable to use Kiosk");
-                    } finally {
-                        voterAtKiosk.completedBallot.set(true);
-                        voterAtKiosk.beingAssisted.set(false);
-                    }
-                }
+        for (int i=0;i<ElectionDay.kioskQueues.size();i++) {
+            Vector<Voter> v = ElectionDay.kioskQueues.get(i);
+            if(!v.isEmpty()) {
+                Voter voter = v.get(0);
+                v.remove(0);
+                msg("Voter"+voter.id+ " done using Kiosk"+i);
+                voter.useKiosk.set(true);
             }
         }
     }

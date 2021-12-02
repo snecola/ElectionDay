@@ -10,7 +10,7 @@ public class Voter extends Thread{
     volatile AtomicBoolean waitForIdCheck = new AtomicBoolean(true);
     volatile AtomicBoolean waitForKioskHelper = new AtomicBoolean(false);
     volatile AtomicBoolean beingAssisted = new AtomicBoolean(false);
-    volatile AtomicBoolean completedBallot = new AtomicBoolean(false);
+    volatile AtomicBoolean useKiosk = new AtomicBoolean(false);
 
     public Voter(int id) {
         this.id = id;
@@ -43,27 +43,35 @@ public class Voter extends Thread{
         while(waitForIdCheck.get()) {}
         msg("Passed IDChecker");
         //Find the shortest kiosk queue
-        if(ElectionDay.kioskHelperLock.compareAndSet(false, true)){
-            try{
-                ElectionDay.kioskHelperLine.add(this);
-                msg("Added voter to KioskHelper line");
-            } catch (Exception e) {
-                msg("Unable to add to KioskHelper line");
-            } finally {
-                ElectionDay.kioskHelperLock.set(false);
+
+        if (waitForKioskHelper.get()) {
+            if (ElectionDay.kioskHelperLock.compareAndSet(false, true)) {
+                try {
+                    ElectionDay.kioskHelperLine.add(this);
+                    msg("Added voter to KioskHelper line");
+                } catch (Exception e) {
+                    msg("Unable to add to KioskHelper line");
+                } finally {
+                    ElectionDay.kioskHelperLock.set(false);
+                }
             }
         }
+
+//        while(!waitForKioskHelper.get()) {}
+
         //Busy wait for the Kiosk Helper to put the Voter in the shortest kiosk line
-        while(waitForKioskHelper.get()){}
+//        while(waitForKioskHelper.get()){}
 
         // Sleep to complete ballot
         try {
-            sleep(Math.abs(random.nextInt(4000)));
+            sleep(Math.abs(random.nextInt(15000)));
         } catch (InterruptedException e) {
-            msg("Interrupted while completing ballot");
+            msg("This voter's turn to complete their ballot");
         }
 
-        while(!completedBallot.get()){}
+        while(!useKiosk.get()){}
+
+
 
     }
 

@@ -17,7 +17,6 @@ public class ElectionDay {
 
     // Line for the ID Checkers
     static volatile Vector<Voter> idCheckerLine;
-
     // Array containing the Threads for IDCheckers
     static volatile Thread[] idCheckerThreads;
     // Array containing boolean values if IDChecker is available
@@ -26,15 +25,19 @@ public class ElectionDay {
 
     // Thread for KioskHelper
     static Thread kioskHelper;
+    // Lock to make sure voters enter the kioskHelperLine one by one
     static volatile AtomicBoolean kioskHelperLock = new AtomicBoolean(false);
-
-    //Boolean for if a Voter is allowed to enter a queue.
-    static volatile Vector<AtomicBoolean> enterShortestQueue;
-
     // Array containing the Queues for each Kiosk
     static volatile Vector<Vector<Voter>> kioskQueues;
-    // Line for Kiosk Helper to assist Voters
+    // Line for Kiosk Helper to assist Voters in the order they finish checking IDs
     static volatile Vector<Voter> kioskHelperLine;
+
+    // Thread for ScanningHelper
+    static Thread scanningHelper;
+    // Lock to make sure voters enter the scanningHelperLine one by one
+    static volatile AtomicBoolean scanningHelperLock = new AtomicBoolean(false);
+    // Line for Scanning Helper to assist Voters in the order they finish using Kiosks
+    static volatile Vector<Voter> scanningHelperLine;
 
     // Signals all helpers they can exit and leave
     static volatile AtomicBoolean votersDone = new AtomicBoolean(false);
