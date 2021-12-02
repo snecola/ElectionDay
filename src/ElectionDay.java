@@ -1,4 +1,8 @@
+import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ElectionDay {
 
@@ -12,7 +16,7 @@ public class ElectionDay {
     static Thread[] voterThreads;
 
     // Line for the ID Checkers
-    static volatile BlockingQueue<Voter> idCheckerLine;
+    static volatile Vector<Voter> idCheckerLine;
 
     // Array containing the Threads for IDCheckers
     static Thread[] idCheckerThreads;
@@ -21,17 +25,35 @@ public class ElectionDay {
     static Thread kioskHelper;
 
     // Array containing the Queues for each Kiosk
-    static volatile BlockingQueue<Voter>[] kioskQueues;
+    static volatile Vector[] kioskQueues;
+
+    static volatile AtomicBoolean votersDone = new AtomicBoolean(false);
 
     //
 
     public static void main (String[] args) {
+
+        // Initialize the IDChecker Line
+        idCheckerLine = new Vector<>();
+
+        // Initialize the Kiosk queues
+        kioskQueues = new Vector[num_k];
+        for (int i=0;i<num_k;i++){
+            kioskQueues[i]= new Vector<Voter>();
+        }
+
+
         // Initialize the array of IDChecker Threads
         idCheckerThreads = new Thread[num_ID_checkers];
+        // Create the IDCheckers, start their threads
         for (int i=0;i<num_ID_checkers;i++){
             idCheckerThreads[i]=new IDChecker(i);
             idCheckerThreads[i].start();
         }
+
+        // Initialize and Start the KioskHelper
+        kioskHelper = new KioskHelper(0);
+        kioskHelper.start();
 
         // Initialize the array of Voter Threads
         voterThreads= new Thread[num_voters];

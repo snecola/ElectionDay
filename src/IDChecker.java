@@ -10,7 +10,19 @@ public class IDChecker extends Thread{
 
     @Override
     public void run () {
-
+        while(true){
+            if (!ElectionDay.idCheckerLine.isEmpty()) {
+                Voter v = ElectionDay.idCheckerLine.get(0);
+                v.waitForIdCheck.set(false);
+                ElectionDay.idCheckerLine.remove(0);
+                msg("Checked Voter"+v.id+" ID");
+            }
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                msg("Interupted IDChecker Sleep");
+            }
+        }
     }
 
     public void msg(String m) {
