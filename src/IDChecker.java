@@ -13,10 +13,13 @@ public class IDChecker extends Thread{
 
     @Override
     public void run () {
+        // While voters are still here
         while(!ElectionDay.votersDone.get()){
+            // This thread can exit when it finishes checking all voters IDs
             if (ElectionDay.voterCounter.get()==ElectionDay.num_voters){
                 break;
             }
+            // In the order they arrive, check their IDs and pass them.
             if (!ElectionDay.idCheckerLine.isEmpty()) {
                 try {
                     Voter v = ElectionDay.idCheckerLine.get(0);

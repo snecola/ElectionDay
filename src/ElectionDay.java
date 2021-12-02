@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElectionDay {
 
+    // Steven Necola
+
     // Default Values for run
     static int num_voters = 20;
     static int num_ID_checkers = 3;

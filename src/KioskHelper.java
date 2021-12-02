@@ -13,7 +13,9 @@ public class KioskHelper extends Thread{
 
     @Override
     public void run () {
+        // While voters are still here
         while(!ElectionDay.votersDone.get()){
+            // For each Kiosk's line allow the first person on line to use the kiosk
             for (Vector<Voter> v : ElectionDay.kioskQueues) {
                 if (!v.isEmpty()){
                     Voter voter = v.get(0);
@@ -24,11 +26,6 @@ public class KioskHelper extends Thread{
                     v.remove(0);
                 }
             }
-//            try {
-//                sleep(100);
-//            } catch (InterruptedException e){
-//                msg("Interrupted in KioskQueue");
-//            }
         }
     }
 

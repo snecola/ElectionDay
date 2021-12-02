@@ -86,6 +86,7 @@ public class ScanningHelper extends Thread{
 
     @Override
     public void run() {
+        // While voters are still here
         while(!ElectionDay.votersDone.get()){
             // Look for Voters waiting to enter the scanning room
             for (Voter v : ElectionDay.voterThreads) {

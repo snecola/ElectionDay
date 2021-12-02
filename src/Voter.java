@@ -8,6 +8,7 @@ public class Voter extends Thread{
     public static long time = System.currentTimeMillis();
     int id;
 
+    // Thread specific booleans to ensure order in execution.
     volatile AtomicBoolean waitForIdCheck = new AtomicBoolean(true);
     volatile AtomicBoolean waitForKioskHelper = new AtomicBoolean(false);
     volatile AtomicBoolean waitForScanningMachine = new AtomicBoolean(false);
@@ -15,6 +16,7 @@ public class Voter extends Thread{
     volatile AtomicBoolean useKiosk = new AtomicBoolean(false);
     volatile AtomicBoolean readyToLeave = new AtomicBoolean(false);
 
+    // Meant to join with this voter to leave
     volatile Voter leaveWithVoter=null;
 
     public Voter(int id) {
@@ -55,7 +57,6 @@ public class Voter extends Thread{
         if (ElectionDay.kioskHelperLock.compareAndSet(false, true)) {
             try {
                 //Find the shortest kiosk queue
-//                findShortestQueue();
                 ElectionDay.kioskQueues.get(ElectionDay.shortestQueue.get()).add(this);
                 msg("Voter" + id + " joined KioskQueue"+ElectionDay.shortestQueue.get());
                 ElectionDay.shortestQueue.set((ElectionDay.shortestQueue.get()+1)%ElectionDay.num_k);
@@ -68,6 +69,7 @@ public class Voter extends Thread{
             }
         }
 
+        // Wait for your turn using the Kiosk
         if (waitForKioskHelper.get()) {
             try {
                 sleep(16000);
@@ -76,6 +78,7 @@ public class Voter extends Thread{
                 msg("This voter's turn to complete their ballot");
             }
         }
+        // Use the kiosk, complete the ballot
         if (useKiosk.get()){
             try {
                 sleep(Math.abs(random.nextInt(5000))+3000);
@@ -131,6 +134,8 @@ public class Voter extends Thread{
         }
     }
 
+    // Function to join threads before they leave
+    // Couldn't figure it out :(
     public boolean joinGroup (Voter v) throws InterruptedException {
         if (v.isAlive()) {
             msg("Joined Voter"+ v.id);
